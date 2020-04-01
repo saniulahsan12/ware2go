@@ -5,10 +5,6 @@ add_action( 'woocommerce_order_status_changed', 'track_order_details' );
 
 function track_order_details($order_id = null) {
 
-	$leapingDebug = false;
-	$userIP = getUserIpAddr();
-	if ($userIP == '69.201.31.171') $leapingDebug = true;
-
     // if order is empty get back from here
 	if($order_id == null){
 	    return;
@@ -27,19 +23,19 @@ function track_order_details($order_id = null) {
 
     // sample order api data for API call, like order create
     $order_line_api_data = [
-        'referenceId' => 'BPX001',
-        'purchaseOrderNumber' => '123456',
+        'referenceId' => '******',
+        'purchaseOrderNumber' => '*********',
         'skuQuantities' => [],
-        'companyName' => 'warehouse south central',
-        'address1' => '234 W 42 St.',
+        'companyName' => '*********',
+        'address1' => '***********',
         'address2' => NULL,
-        'zipCode' => '10036',
-        'country' => 'USA',
+        'zipCode' => '**********',
+        'country' => '*********',
         'phoneNumber' => '',
         'buyerEmail' => '',
-        'city' => 'New York',
-        'state' => 'NY',
-        'shippingSpeed' => 'TWO_DAY',
+        'city' => '**********',
+        'state' => '*******',
+        'shippingSpeed' => '**********',
     ];
 
     // get parent item here and put it in the api structured data
@@ -99,9 +95,6 @@ function track_order_details($order_id = null) {
         $order_line_api_data['state'] = strval($order_meta['_billing_state'][0]);
     }
 
-//	if($leapingDebug == true) {
-//		echo "<pre>";print_r($order_line_api_data);echo "</pre>"; die(1);
-//	}
     $order_data = json_encode($order_line_api_data);
     $ware2goApi = new AccountAPI();
     $acc_stat = $ware2goApi->createOrder($order_data);
@@ -112,10 +105,6 @@ function track_order_details($order_id = null) {
 	    if(!empty($acc_stat['orderId'])){
             add_action('shop_order_updated_messages', 'success_message');
         } else {
-	        // or we can change the order status to Failed and show failed message.
-		    if($leapingDebug == true) {
-			    echo "<pre>";print_r($acc_stat);echo "</pre>"; die(1);
-		    }
             $order->update_status('failed');
             add_action('shop_order_updated_messages', 'failed_message');
         }
@@ -123,17 +112,4 @@ function track_order_details($order_id = null) {
         $order->update_status('failed');
         add_action('shop_order_updated_messages', 'failed_message');
     }
-}
-
-function getUserIpAddr(){
-	if(!empty($_SERVER['HTTP_CLIENT_IP'])){
-		//ip from share internet
-		$ip = $_SERVER['HTTP_CLIENT_IP'];
-	}elseif(!empty($_SERVER['HTTP_X_FORWARDED_FOR'])){
-		//ip pass from proxy
-		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-	}else{
-		$ip = $_SERVER['REMOTE_ADDR'];
-	}
-	return $ip;
 }
