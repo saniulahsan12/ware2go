@@ -9,6 +9,21 @@ class AccountAPI {
 		$this->token  = get_option('acc_token'); //basic token for authentication
     }
 
+    function addApiLog($data) {
+        global $wpdb;
+        return $wpdb->insert($wpdb->prefix . 'ware2go_api_logs_bpax', $data);
+    }
+
+    function viewApiLog($page = 1, $items_per_page = 1) {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'ware2go_api_logs_bpax';
+        $page = isset( $page ) ? abs( (int) $page ) : 1;
+        $offset = ( $page * $items_per_page ) - $items_per_page;
+        $query = "SELECT * FROM $table_name ORDER BY id DESC LIMIT $items_per_page OFFSET $offset";
+        $result = $wpdb->get_results($query);
+        return $result;
+    }
+
     function filterData($data) {
         return json_decode( $data, true );
     }
@@ -41,7 +56,19 @@ class AccountAPI {
         }
 
         $content = curl_exec( $ch );
+
+        // log api data response to log table of the API
+        self::addApiLog([
+            'response' => $content,
+            'api' => $url,
+            'data' => !empty($postData) ? json_encode($postData) : null,
+            'method' => $type,
+            'order_id' => !empty(json_decode($content)->orderId) ? json_decode($content)->orderId : null,
+            'status' => curl_getinfo($ch, CURLINFO_HTTP_CODE),
+        ]);
+
         curl_close( $ch );
+
         return $content;
     }
 

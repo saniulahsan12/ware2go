@@ -16,6 +16,9 @@ function woo_ware2go_settings_details()
     }
     ?>
     <link rel="stylesheet" href="<?php echo AddFile::addFiles('assets/css', 'bootstrap.min', 'css', true); ?>">
+    <style>
+        .update-nag, .updated, .error, .is-dismissible { display: none !important; }
+    </style>
     <div class="container d-flex justify-content-center" style="margin-top: 5%">
         <div class="col-md-6">
             <div class="jumbotron" style="background: burlywood">

@@ -21,6 +21,43 @@ if ( !function_exists( 'add_action' ) ) {
 define( 'WOO_WARE2GO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MAIL_PDF_DIR', ABSPATH . 'wp-content/uploads/ware2go_upload_files/' );
 
+// function to create the DB / Options / Defaults
+function bpax_trigger_activating_plugin() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'ware2go_api_logs_bpax';
+    // create the ECPT metabox database table
+    if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
+        $sql = "CREATE TABLE " . $table_name . " (
+            `id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            `time` timestamp NOT NULL DEFAULT current_timestamp(),
+            `response` text DEFAULT NULL,
+            `api` varchar(255) DEFAULT NULL,
+            `method` varchar(255) DEFAULT NULL,
+            `data` text DEFAULT NULL,
+            `order_id` bigint(20) DEFAULT NULL,
+            `status` int(11) DEFAULT NULL
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql);
+    }
+
+}
+
+// Delete the table when uninstalling the plugin
+function bpax_trigger_deactivating_plugin() {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'ware2go_api_logs_bpax';
+    $sql = "DROP TABLE IF EXISTS $table_name;";
+    $wpdb->query($sql);
+}
+
+// run the install scripts upon plugin activation
+register_activation_hook(__FILE__, 'bpax_trigger_activating_plugin');
+
+// run the uninstall scripts upon the plugin deactivation
+register_deactivation_hook(__FILE__, 'bpax_trigger_deactivating_plugin' );
+
 require_once( WOO_WARE2GO_PLUGIN_DIR . '/class/bootfile.class.php' );
 
 AddFile::addFiles('/', 'helpers', 'php');

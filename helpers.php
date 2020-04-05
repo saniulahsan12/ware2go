@@ -1,24 +1,8 @@
 <?php
-function success_message() {
-    ?>
-    <div class="notice notice-success is-dismissible">
-        <p><?php _e( 'Congrats! This order is successfully sent to Ware2Go API.', 'woo-ware2go' ); ?></p>
-    </div>
-    <?php
-}
-
-function error_message() {
+function error_message(){
     ?>
     <div class="notice notice-error is-dismissible">
         <p><?php _e( 'Sorry! Woo-Ware2Go needs WooCommerce installed to run, Please install WooCommerce first.', 'woo-ware2go' ); ?></p>
-    </div>
-    <?php
-}
-
-function failed_message() {
-    ?>
-    <div class="notice notice-error is-dismissible">
-        <p><?php _e( 'Sorry! Failed to send order to Ware2Go API, Please try again.', 'woo-ware2go' ); ?></p>
     </div>
     <?php
 }
@@ -45,34 +29,56 @@ function retrieve_plain_title($title){
     return false;
 }
 
-// SETUP CRON
-add_action('wp', 'ballax_schedule_cron');
-function ballax_schedule_cron() {
-    if (!wp_next_scheduled( 'ballax_cron' )){
-        wp_schedule_event(time(), 'ballaxRepeatTime', 'ballax_cron');
-    }
+add_action( 'woocommerce_product_options_general_product_data', 'bpax_option_group' );
+
+function bpax_option_group(){
+    echo '<div class="options_group">';
+
+    woocommerce_wp_checkbox( array(
+        'id'      => 'bpax_complex_or_simple',
+        'value'   => get_post_meta( get_the_ID(), 'bpax_complex_or_simple', true ),
+        'label'   => 'Complex product',
+        'desc_tip' => true,
+        'description' => 'This field is for to determine that if it is a simple product or a complex product(mix of many product). check it for complex or uncheck for simple',
+    ) );
+
+    echo '</div>';
 }
 
-// the CRON hook for firing function
-add_action('ballax_cron', 'ballax_cron_function_trigger');
-add_action('wp_head', 'ballax_cron_function_trigger'); //test on page load
-
-// the actual function
-function ballax_cron_function_trigger() {
-    // see if fires via email notification
-    try {
-//        wp_mail('user@domain.com', 'Cron Worked', date('r'));
-    } catch (Exception $e){
-
-    }
+add_action( 'woocommerce_process_product_meta', 'bpax_save_fields', 10, 2 );
+function bpax_save_fields( $id, $post ){
+    update_post_meta( $id, 'bpax_complex_or_simple', $_POST['bpax_complex_or_simple'] );
 }
 
-// CUSTOM TIME INTERVAL
-add_filter('cron_schedules', 'ballax_cron_add_intervals');
-function ballax_cron_add_intervals($schedules) {
-    $schedules['ballaxRepeatTime'] = array(
-        'interval' => 3600,
-        'display' => __('Every hour repeat Ballax CRON...')
-    );
-    return $schedules;
+if(!empty($_GET['bpax_status']) && $_GET['bpax_status'] == 'sku_failed'){
+    echo '<script>alert("Order Status Changed to Failed because of 5 Missing SKU\'s in the Items.");</script>';
+}
+
+if(!empty($_GET['bpax_status']) && $_GET['bpax_status'] == 'api_failed'){
+    echo '<script>alert("Order Status Changed to Failed because it cannot update the ware 2 go API data, Please try again.");</script>';
+}
+
+if(!empty($_GET['bpax_status']) && $_GET['bpax_status'] == 'api_success'){
+    echo '<script>alert("Order Status Successfully changed and sent to ware 2 API.");</script>';
+}
+
+add_action("wp_ajax_bpax_load_api_logs", "bpax_load_api_logs");
+function bpax_load_api_logs() {
+
+    $request = $_GET;
+    if ( !isset( $request['nonce'] ) || !wp_verify_nonce( $request['nonce'], 'bpax_submit' ) ) {
+        exit;
+    }
+    $result = [];
+    $ware2goApi = new AccountAPI();
+    $response = $ware2goApi->viewApiLog($request['page'], $request['data_per_page']);
+    if(empty($response)){
+        exit;
+    }
+    foreach($response as $key => $rsp){
+        $result[$key] = (array)$rsp;
+        $result[$key]['data'] = json_decode($rsp->data);
+    }
+    wp_send_json($result);
+    die();
 }
