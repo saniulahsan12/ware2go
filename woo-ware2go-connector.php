@@ -1,5 +1,5 @@
 <?php
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
+defined('ABSPATH') or die('No script kiddies please!');
 /**
  * @package Woo-Ware2Go
  */
@@ -14,19 +14,19 @@ Text Domain: woo-ware2go
 */
 
 // Make sure we don't expose any info if called directly
-if ( !function_exists( 'add_action' ) ) {
-	die( 'No script kiddies please!' );
+if (!function_exists('add_action')) {
+    die('No script kiddies please!');
 }
 
-define( 'WOO_WARE2GO_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
-define( 'MAIL_PDF_DIR', ABSPATH . 'wp-content/uploads/ware2go_upload_files/' );
+define('WOO_WARE2GO_PLUGIN_DIR', plugin_dir_path(__FILE__));
 
 // function to create the DB / Options / Defaults
-function bpax_trigger_activating_plugin() {
+function bpax_trigger_activating_plugin()
+{
     global $wpdb;
     $table_name = $wpdb->prefix . 'ware2go_api_logs_bpax';
     // create the ECPT metabox database table
-    if($wpdb->get_var("show tables like '$table_name'") != $table_name) {
+    if ($wpdb->get_var("show tables like '$table_name'") != $table_name) {
         $sql = "CREATE TABLE " . $table_name . " (
             `id` bigint(20) NOT NULL AUTO_INCREMENT PRIMARY KEY,
             `time` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -41,11 +41,11 @@ function bpax_trigger_activating_plugin() {
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
     }
-
 }
 
 // Delete the table when uninstalling the plugin
-function bpax_trigger_deactivating_plugin() {
+function bpax_trigger_deactivating_plugin()
+{
     global $wpdb;
     $table_name = $wpdb->prefix . 'ware2go_api_logs_bpax';
     $sql = "DROP TABLE IF EXISTS $table_name;";
@@ -56,26 +56,25 @@ function bpax_trigger_deactivating_plugin() {
 register_activation_hook(__FILE__, 'bpax_trigger_activating_plugin');
 
 // run the uninstall scripts upon the plugin deactivation
-register_deactivation_hook(__FILE__, 'bpax_trigger_deactivating_plugin' );
+register_deactivation_hook(__FILE__, 'bpax_trigger_deactivating_plugin');
 
-require_once( WOO_WARE2GO_PLUGIN_DIR . '/class/bootfile.class.php' );
+require_once(WOO_WARE2GO_PLUGIN_DIR . '/class/bootfile.class.php');
 
-AddFile::addFiles('/', 'helpers', 'php');
+BpaxAddFile::addFiles('/', 'helpers', 'php');
 
-if(in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
+if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
+    BpaxAddFile::addFiles('class', 'api.class', 'php');
+    BpaxAddFile::addFiles('class', 'trackorder.class', 'php');
+    BpaxAddFile::addFiles('views', 'settings', 'php');
+    BpaxAddFile::addFiles('views', 'logs', 'php');
 
-    AddFile::addFiles('class', 'api.class', 'php');
-    AddFile::addFiles('class', 'trackorder.class', 'php');
-    AddFile::addFiles('views', 'settings', 'php');
-    AddFile::addFiles('views', 'logs', 'php');
-
-    add_action('admin_menu', 'woo_ware2go_settings');
-    function woo_ware2go_settings()
+    add_action('admin_menu', 'bpax_woo_ware2go_settings');
+    function bpax_woo_ware2go_settings()
     {
-        add_menu_page('Woo Ware2Go Connector', 'BPX Ware2Go', 'manage_options', 'bpx-ware2go-api-settings', 'woo_ware2go_settings_details', AddFile::addFiles('assets/images', 'icon-small', 'png', true), 100);
-        add_submenu_page('bpx-ware2go-api-settings', 'Api logs', 'Api logs', 'manage_options', 'bpx-ware2go-api-logs', 'wp_tracker_logs_details');
+        add_menu_page('Woo Ware2Go Connector', 'BPX Ware2Go', 'manage_options', 'bpx-ware2go-api-settings', 'bpax_woo_ware2go_settings_details', BpaxAddFile::addFiles('assets/images', 'icon-small', 'png', true), 100);
+        add_submenu_page('bpx-ware2go-api-settings', 'Api logs', 'Api logs', 'manage_options', 'bpx-ware2go-api-logs', 'bpax_wp_tracker_logs_details');
     }
 
 } else {
-    add_action('admin_notices', 'error_message');
+    add_action('admin_notices', 'bpax_error_message');
 }

@@ -1,9 +1,9 @@
 <?php
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
-function wp_tracker_logs_details()
+defined('ABSPATH') or die('No script kiddies please!');
+function bpax_wp_tracker_logs_details()
 {
     ?>
-    <link rel="stylesheet" href="<?php echo AddFile::addFiles('assets/css', 'bootstrap.min', 'css', true); ?>">
+    <link rel="stylesheet" href="<?php echo BpaxAddFile::addFiles('assets/css', 'bootstrap.min', 'css', true); ?>">
     <style>
         .update-nag, .updated, .error, .is-dismissible { display: none !important; }
         @-webkit-keyframes rotating /* Safari and Chrome */ {
@@ -95,9 +95,9 @@ function wp_tracker_logs_details()
             </div>
         </div>
     </div>
-    <script src="<?php echo AddFile::addFiles('assets/js', 'bootstrap.min', 'js', true); ?>"></script>
+    <script src="<?php echo BpaxAddFile::addFiles('assets/js', 'bootstrap.min', 'js', true); ?>"></script>
     <script>
-        var bapx__nonce = "<?php echo wp_create_nonce( 'bpax_submit' ); ?>";
+        var bapx__nonce = "<?php echo wp_create_nonce('bpax_submit'); ?>";
         var bpax__api_page = 1;
         var bpax__data_per_page = 20;
         var loadMoreBtn = jQuery(".bpax-load-api-logs");
@@ -105,7 +105,7 @@ function wp_tracker_logs_details()
 
             jQuery.ajax({
                 type : "get",
-                url : "<?php echo admin_url( 'admin-ajax.php' ); ?>",
+                url : "<?php echo admin_url('admin-ajax.php'); ?>",
                 responseType: 'application/json',
                 data : {
                     action: "bpax_load_api_logs",

@@ -1,13 +1,12 @@
 <?php
-defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
-function woo_ware2go_settings_details()
+defined('ABSPATH') or die('No script kiddies please!');
+function bpax_woo_ware2go_settings_details()
 {
 
     $status = null;
 
     if (isset($_POST['save-credence']) && !empty($_POST['acc_api_url']) && !empty($_POST['acc_merchant_id']) && !empty($_POST['acc_token'])) {
-        if (
-            update_option('acc_api_url', $_POST['acc_api_url']) ||
+        if (update_option('acc_api_url', $_POST['acc_api_url']) ||
             update_option('acc_merchant_id', $_POST['acc_merchant_id']) ||
             update_option('acc_token', $_POST['acc_token'])
         ) {
@@ -15,7 +14,7 @@ function woo_ware2go_settings_details()
         }
     }
     ?>
-    <link rel="stylesheet" href="<?php echo AddFile::addFiles('assets/css', 'bootstrap.min', 'css', true); ?>">
+    <link rel="stylesheet" href="<?php echo BpaxAddFile::addFiles('assets/css', 'bootstrap.min', 'css', true); ?>">
     <style>
         .update-nag, .updated, .error, .is-dismissible { display: none !important; }
     </style>
@@ -23,7 +22,7 @@ function woo_ware2go_settings_details()
         <div class="col-md-6">
             <div class="jumbotron" style="background: burlywood">
                 <img class="img-responsive"
-                     style="margin: 0 auto; display: table" src="<?php echo AddFile::addFiles('assets/images', 'icon', 'png', true); ?>" alt="logo">
+                     style="margin: 0 auto; display: table" src="<?php echo BpaxAddFile::addFiles('assets/images', 'icon', 'png', true); ?>" alt="logo">
                 <form action="" method="post">
                     <br>
 
@@ -44,7 +43,7 @@ function woo_ware2go_settings_details()
                     </div>
                     <input id="submit" type="submit" name="save-credence" class="btn btn-success" value="Save Data">
                 </form>
-                <?php if (!empty($status)): ?>
+                <?php if (!empty($status)) : ?>
                     <br>
                     <div class="alert alert-success" role="alert"><strong>Well done!</strong> You successfully saved
                         this data.
